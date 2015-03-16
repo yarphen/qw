@@ -1,277 +1,232 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title></title>
-<script>
-//if (document.location.protocol.search("s")==-1)
-//	document.location.href="https://"+document.location.hostname+document.location.pathname;
-</script>
-<link rel="stylesheet"
-	href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+ <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-<script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<link rel="stylesheet" href="/resources/demos/style.css">
+<script>
+$(function() {
+$( "#taskdate" ).datepicker();
+});
+</script>
 <style>
-textarea {
-	resize: none;
-}
-
-.scrollbox {
-	width: 350px;
-	height: 647px;
-	overflow-y: scroll;
-	border-style: ridge;
-	border-color: #2a629f;
-	border-width: 7px;
-}
-
-.flowbox {
-	resize: both;
-	width: 350px;
-	height: 647px;
+.footer {
 	position: absolute;
-	top: 1px;
-	left: 1px;
-	overflow-y: scroll;
-	border-style: ridge;
-	border-color: #2a629f;
-	border-width: 7px;
-	background-color: #82a8cf;
+	bottom: 2%;
+	background-color: red;
+	height: 30px;
+	width: 90%;
+	left: 5%;
+}
+
+.mybutton {
+	position: relative;
+	background-color: blue;
+	display: inline-block;
+	width: 10%;
+	height: 20px;
+	margin-left: 30px;
+	margin-right: 30px;
+	vertical-align: middle;
+}
+
+.menucontainer {
+	position: absolute;
+	background-color: grey;
+	height: 30px;
+	width: 90%;
+	top: 5px;
+	left: 5%;
+}
+
+.listcontainer {
+	
+}
+
+.taskeditor {
+	background-color: grey;
+	position: fixed;
+	width: 60%;
+	height: 60%;
+	top: 20%;
+	left: 20%;
+	position: fixed;
+}
+
+.hidden {
+	display: none;
 }
 </style>
-<script type="text/javascript">
-var i = document.getElementById("1");
-var log=[];
-var node_id=0;
-var bratchyk_id=0;
-var drag=false;
-var dragobj;
-var divx, divy;
-function addAct(type, id_bratchyk, id_property, id_index, newvalue){
-	log.push(type);
-	log.push(id_bratchyk);
-	log.push(id_property);
-	log.push(id_index);
-	if (id_property==19)
-    	var element=document.getElementById(newvalue).checked;
-	else
-    	var element=document.getElementById(newvalue).value;
-	log.push(element);
-}
-function doAct(){
-	var log2=[];
-	while(log.length > 0)
-		log2.push(log.pop());
-	while(log2.length > 0){		
-		var type = log2.pop();//1
-		var bratchyk=log2.pop();//2
-		var property = log2.pop();//3
-		var index = log2.pop();//4
-		var newvalue = log2.pop();//5
-		switch (type) {
-		case 0:
-			propAddReq(bratchyk,property,newvalue);
-			break;
-		case 1:
-			propEditReq(bratchyk,property,index,newvalue);
-			break;
-		case 2:
-			propDelReq(bratchyk,property,index);
-			break;
-		case 3:
-			propSetReq(bratchyk,property,newvalue);
-			break;
-		}
-	}
-	refresh();
-}
-function cancel(){
-	log=[];
-	refresh();
-}
-function req(id,s,flag){
-	var xmlhttp;
-	if (window.XMLHttpRequest)
-	{// code for IE7+, Firefox, Chrome, Opera, Safari
-		xmlhttp=new XMLHttpRequest();
-	}
-	else
-	{// code for IE6, IE5
-		xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-	}
-	xmlhttp.onreadystatechange=function(){
-		if (xmlhttp.readyState==4 && xmlhttp.status==200 && flag==true){	document.getElementById(id).innerHTML=xmlhttp.responseText;
-		}
-	}
-	xmlhttp.open("POST",s,true);
-	xmlhttp.send();
-}
-function refresh(){
-	logReq();
-	histReq();
-	listReq();
-	mapReq(node_id);
-	propReq(bratchyk_id);
-}
-function clearChooser(){
-	document.getElementById("chooser").innerHTML="";
-}
-function hexReq(){
-	req("chooser", "db?type=get&get=hex",true);
-}
-function saveReq(){
-	req("0", "db?type=save",false);
-}
-function chooserReq(node){
-	req("chooser", "db?type=get&get=chooser&id_node="+node,true);
-}
-function logReq(){
-	req("logblock", "db?type=get&get=log",true);
-}
-function histReq(){
-	req("0", "db?type=get&get=history",true);
-}
-function listReq(){
-	req("1", "db?type=get&get=list",true);
-}
-function mapReq(node){
-	node_id = node;
-	req("2", "db?type=get&get=map&id_node="+node,true);
-}
-function propReq(bratchyk){
-	bratchyk_id=bratchyk;
-	req("3", "db?type=get&get=property&id_bratchyk="+bratchyk,true);
-}
-function nodeAddReq(){
-	req("1", "db?type=act&act=addnode",false);
-	refresh();
-}
-function nodeDelReq(node){
-	if (confirm("Видалити фрагмент дерева "+node+"?")){
-		req("1", "db?type=act&act=deletenode&id_node="+node,false);
-		refresh();
-	}
-}
-function linkReq(node,bratchyk){
-	req("1", "db?type=act&act=link&id_node="+node+"&id_bratchyk="+bratchyk,false);
-	refresh();
-	clearChooser();
-}
-function unlinkReq(bratchyk){
-	req("1", "db?type=act&act=unlink&id_bratchyk="+bratchyk,false);
-	refresh();
-}
-function undoReq(count){
-	req("1", "db?type=act&act=undo&act_count="+count,false);
-	refresh();
-}
-function propAddReq(bratchyk,property,newvalue){
-	req("3", "db?type=act&act=property&details=add&id_bratchyk="+bratchyk+"&id_property="+property+"&new_value="+newvalue,false);
-}
-function propEditReq(bratchyk,property,index,newvalue){
-	req("3", "db?type=act&act=property&details=edit&id_bratchyk="+bratchyk+"&id_property="+property+"&id_index="+index+"&new_value="+newvalue,false);
-}			
-function propDelReq(bratchyk,property,index){
-	req("3", "db?type=act&act=property&details=delete&id_bratchyk="+bratchyk+"&id_property="+property+"&id_index="+index,false);
-}			
-function propSetReq(bratchyk,property,newvalue){
-	req("3", "db?type=act&act=property&details=set&id_bratchyk="+bratchyk+"&id_property="+property+"&new_value="+newvalue,false);
-}
-window.onload=function(){
-document.getElementById("logblock").onmousedown= startDragLog;
-document.getElementById("chooser").onmousedown= startDragChooser;
-document.getElementById("logblock").onmouseup= endDrag;
-document.getElementById("chooser").onmouseup= endDrag;
-window.onmousemove= moveIt;
-}
-
-
-function startDragChooser(e) {
-	dragobj=document.getElementById("ChooserContainer");
-	divx=e.pageX-parseInt(dragobj.style.left.split("p")[0]);
-	divy=e.pageY-parseInt(dragobj.style.top.split("p")[0]);
-	drag=true;
-}
-function startDragLog(e) {
-	dragobj=document.getElementById("LogContainer");
-	divx=e.pageX-parseInt(dragobj.style.left.split("p")[0]);
-	divy=e.pageY-parseInt(dragobj.style.top.split("p")[0]);
-	drag=true;
-}
-function moveIt(event) {
-	if (drag){
-		dragobj.style.left=event.pageX-divx+"px";
-		dragobj.style.top=event.pageY-divy+"px";
-	}
-	clearSelection();
-}
-
-function endDrag(event) {
-	drag=false;
-	divx=undefined;
-	divy=undefined;
-}
-</script>
 <script>
-  function clearSelection() {
-    if (window.getSelection) {
-      window.getSelection().removeAllRanges();
-    } else { // старый IE
-      document.selection.empty();
-    }
-  }
+ function tasktohtml(task){
+	
+ }
+ function moveto(address){
+	 history.pushState(new Object(), null, location.protocol+'//'+location.pathname+'?'+address);
+	 route(address);
+ }
+ function route(id){
+ 	if (localStorage[id]){
+ 		editdialog(id);
+ 	}else if (id=='done'){
+ 		taskload('true');
+ 	}else if (id=='undone'){
+ 		taskload('false');
+ 	}else if (id=='all'){
+ 		taskload('all');
+ 	}else if (id=='new'){
+ 		editdialog(null);
+ 	}
+ }
+ function editdialog(id){
+ 	if (id==null||localStorage[id]==undefined){
+ 		document.getElementById('taskname').value="";
+ 		document.getElementById('taskdate').value="";
+ 		document.getElementById('tasktext').value="";
+ 		document.getElementById('savebutton').onclick=function(){if (testvalideform(document.getElementById('taskname').value,  document.getElementById('taskdate').value))createtask(document.getElementById('taskname').value, document.getElementById('tasktext').value, document.getElementById('taskdate').value);};
+ 		document.getElementById('cancelbutton').onclick=function(){editdialog(null);};
+ 	}else{
+ 		var task = stringtotask(localStorage[id]);
+ 		document.getElementById('taskname').value=task.name;
+ 		document.getElementById('taskdate').value=task.date;
+ 		document.getElementById('tasktext').value=task.text;
+ 		document.getElementById('savebutton').onclick=function(){if (testvalideform(document.getElementById('taskname').value,  document.getElementById('taskdate').value))edittask(id, document.getElementById('taskname').value, document.getElementById('tasktext').value, document.getElementById('taskdate').value);};
+ 		document.getElementById('cancelbutton').onclick=function(){editdialog(id);};
+ 	}
+ }
+ function testvalideform(name, date){
+	 var test = true;
+	if (trim(name).length<3){
+		 alert("Too short name!");
+		 test=false;
+	}
+ 	if (!testdate(date)){
+ 		alert("Choose valide date!");
+ 		test=false;
+	}
+ 	return test;
+ }
+ function taskload(flag) {
+ 	var temp = '';
+ 	var iftrue = false;
+	var iffalse = false;
+ 	if (flag == 'true') {
+ 		iftrue = true;
+ 	}
+ 	if (flag == 'false') {
+ 		iffalse = true;
+ 	}
+ 	if (flag == 'all') {
+ 		iftrue = true;
+ 		iffalse = true;
+ 	}
+ 	for ( var id in localStorage) {
+ 		var task = stringtotask(localStorage[id]);
+ 		if ((task.done&&istrue)||(!task.done&&isfalse))
+ 			temp = temp + tasktohtml(task);
+ 	}
+ 	document.getElementById('mytable').getElementByTagName('tbody')[0].innerHTML=temp;
+ }
+ function createtask(name, text, date) {
+ 	var id;
+ 	do{
+ 		id = Math.floor(1000000000*Math.random())+'';
+ 	}while(localStorage[id]);
+ 	var temp = {};
+ 	temp.name = name;
+ 	temp.text = text;
+ 	temp.dateaslong = date;
+ 	temp.done = false;
+ 	localStorage[id]=temp;
+ 	return id;
+ }
+ function deletetask(id) {
+ 	delete(localStorage[id]);
+ }
+ function edittask(id, name, text, date) {
+ 	var temp = stringtotask(localStorage[id]);
+ 	temp.name = name;
+ 	temp.text = text;
+ 	temp.dateaslong = date;
+ 	localStorage[id] = tasktostring(temp);
+ }
+ function changemarktask(id) {
+ 	var temp = stringtotask(localStorage[id]);
+ 	temp.done = !temp.done;
+ 	localStorage[id] = tasktostring(temp);
+ }
+ function tasktostring(task) {
+ 	return myreplaceformat(task.name)+'\n'+myreplaceformat(task.text)+'\n'+myreplaceformat(task.dateaslong)+'\n'+myreplaceformat(task.done);
+ }
+ function stringtotask(string) {
+ 	var task = {};
+ 	var array = string.split('\n');
+ 	task.name = array[0];
+ 	task.text = array[1];
+ 	task.dateaslong = Number(array[2]);
+ 	task.done = Boolean(array[3]);
+ 	return task;
+ }
+ function myreplaceformat(string) {
+ 	return string.replace('\n', ' ');
+ }
 </script>
 </head>
-<body bgcolor="#a7c1de" style="width: 2000px; height: 1500px;">
+<body bgcolor="#a7c1de" align='center'>
+	<button
+		onclick="history.pushState(new Object(), 'page 2', location.protocol+'//'+location.pathname+'?q='+Math.random());">FUCK</button>
 
-	<div id="title"
-		style="position: absolute; width: 1564px; height: 299px; top: 25px; left: 43px; background-image: url(1564x299title.jpg)">
+	<div class='menucontainer'>
+		<div class='mybutton' onclick="moveto('done')">done</div>
+		<div class='mybutton' onclick="moveto('undone')">undone</div>
+		<div class='mybutton' onclick="moveto('all')">all</div>
+		<div class='mybutton' onclick="editdialog(null)">create</div>
 	</div>
-	<div id="logo"
-		style="position: absolute; width: 311px; height: 397px; top: 49px; left: 1640px; background-image: url(431x550logo.gif)">
-	</div>
-	<div id="tools"
-		style="position: absolute; width: 1628px; height: 192px; top: 333px; left: 43px; background-image: url(1628x192tools.jpg)">
-	</div>
-	<div id="area"
-		style="position: absolute; width: 1933px; height: 930px; top: 525px; left: 43px; background-image: url(1933x930area.jpg)">
-		<table cellspacing="25px" cellpadding="50px" bordercolor="#2a629f"
-			width="100%" height="100%" border="15" align="center">
+
+	<div class="listcontainer">
+		<table id='mytable'>
 			<tbody>
 				<tr>
-					<td colspan="4"><div id="tools2">
-							<input type="button" onclick="refresh()" value="load"> <input
-								type="button" onclick="nodeAddReq()" value="add"> <input
-								type="button" onclick="nodeDelReq(node_id)" value="del">
-							<input type="button" onclick="chooserReq(node_id)" value="link">
-							<input type="button" onclick="unlinkReq(bratchyk_id)"
-								value="unlink"> <input type="button" onclick="undoReq()"
-								value="undo">
-								<input type="button" onclick="hexReq()"
-								value="hex">
-								<input type="button" onclick="saveReq()"
-								value="save">
-								<a href="/db?type=download"><input type="button" value="download"></a>
-						</div></td>
+					<td><input id="taskname" type="text"></td>
+					<td><input id="taskdate" type="text" readonly="readonly">
+					</td>
 				</tr>
-				<tr>
-					<td width="483px" valign="top"><div class="scrollbox" id="0"></div></td>
-					<td width="483px" valign="top"><div class="scrollbox" id="1"></div></td>
-					<td width="483px" valign="top"><div class="scrollbox" id="2"></div></td>
-					<td width="483px" valign="top"><div class="scrollbox"
-							style="overflow: hidden" id="3"></div></td>
-				</tr>
-
-
 			</tbody>
 		</table>
 	</div>
-	<div class="flowbox" id="LogContainer" style="top: 1px; left: 1px; float: left;">
-		<div style="width: 100%; height: 100%" id="logblock"></div>
+	<div class="taskeditor">
+		<table>
+			<tbody>
+				<tr>
+					<td colspan="2"></td>
+				</tr>
+				<tr>
+					<td><input id="taskname" type="text"></td>
+					<td><input id="taskdate" type="text" readonly="readonly">
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"><textarea id="tasktext">
+					</textarea></td>
+				</tr>
+				<tr>
+					<td>
+						<button id="savebutton"></button>
+					</td>
+					<td>
+						<button id="cancelbutton"></button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
 	</div>
-	<div class="flowbox" id="ChooserContainer" style="top: 500px; left: 500px; float: left;">
-		<div style="width: 100%; height: 100%" id="chooser"></div>
-	</div>
+	<div class='footer'></div>
 </body>
 </html>
+<!-- remixttpid=737d9077f1ecb027449feab53332e2bd1eba8a874b
+remixstid=829648341_61f797f5164e3915d2
+remixsid=8d24f6e04204a0d2f52238903b2df14a197f8e709bf8d7e9e016c
+  -->
