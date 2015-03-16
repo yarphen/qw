@@ -125,7 +125,7 @@ $( "#taskdate" ).datepicker();
  	}
  	for ( var id in localStorage) {
  		var task = stringtotask(localStorage[id]);
- 		if ((task.done&&istrue)||(!task.done&&isfalse))
+ 		if ((task.done&&iFtrue)||(!task.done&&iffalse))
  			temp = temp + tasktohtml(task);
  	}
  	document.getElementById('mytable').getElementByTagName('tbody')[0].innerHTML=temp;
