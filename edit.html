@@ -65,7 +65,7 @@ $( "#taskdate" ).datepicker();
 	
  }
  function moveto(address){
-	 history.pushState(new Object(), null, location.protocol+'/'+location.pathname+'?'+address);
+	 history.pushState(new Object(), null, location.protocol+'/'+location.hostname+location.pathname+'?'+address);
 	 route(address);
  }
  function route(id){
