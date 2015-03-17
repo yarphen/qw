@@ -99,6 +99,7 @@ margin: 0 auto -4em;
 	}
 	var Hflag;
 	function hidewindow(){
+		if (document.getElementById('taskeditor').display!='none')
 		if (confirm("Really close?"))document.getElementById('taskeditor').className = 'taskeditor hidden';
 	}
 	function tasktohtml(task, id) {
