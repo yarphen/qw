@@ -198,7 +198,11 @@ margin: 0 auto -4em;
 		}
 		return test;
 	}
+	
 	function taskload(flag) {
+		var taskarray=[];
+		var idarray=[];
+		var max=0;
 		var temp = '';
 		var iftrue = false;
 		var iffalse = false;
@@ -214,9 +218,14 @@ margin: 0 auto -4em;
 		}
 		for ( var id in localStorage) {
 			var task = stringtotask(localStorage.getItem(id));
-			if (task != undefined
-					&& ((task.done && iftrue) || (!task.done && iffalse)))
-				temp = temp + tasktohtml(task, id);
+			if (task != undefined && ((task.done && iftrue) || (!task.done && iffalse))){
+				task.id=id;
+				taskarray.push(task);
+			}
+		}
+		taskarray.sort(function(task1, task2){return task1.dateaslong-task2.dateaslong;});
+		for (var i=0; i<max; i++){
+			temp = temp + tasktohtml(taskarray[i],taskarray[i].id);
 		}
 		if (temp.trim().length == 0)
 			temp = "<tr><td>No data!</td></tr>"
