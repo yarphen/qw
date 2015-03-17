@@ -222,6 +222,7 @@ margin: 0 auto -4em;
 			if (task != undefined && ((task.done && iftrue) || (!task.done && iffalse))){
 				task.id=id;
 				taskarray.push(task);
+				max++;
 			}
 		}
 		taskarray.sort(function(task1, task2){return task1.dateaslong-task2.dateaslong;});
