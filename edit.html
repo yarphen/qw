@@ -158,12 +158,12 @@ margin: 0 auto -4em;
 			document.getElementById('savebutton').onclick = function() {
 				if (testvalideform(document.getElementById('taskname').value,
 						document.getElementById('taskdate').value))
-					createtask(document.getElementById('taskname').value,
+					if (confirm("Save changes?")){createtask(document.getElementById('taskname').value,
 							document.getElementById('tasktext').value, document
-									.getElementById('taskdate').value);
+									.getElementById('taskdate').value);}
 			};
 			document.getElementById('cancelbutton').onclick = function() {
-				editdialog(null);
+				if (confirm("Discard changes?")){editdialog(null);}
 			};
 		} else {
 			var task = stringtotask(localStorage.getItem(id));
@@ -174,12 +174,12 @@ margin: 0 auto -4em;
 			document.getElementById('savebutton').onclick = function() {
 				if (testvalideform(document.getElementById('taskname').value,
 						document.getElementById('taskdate').value))
-					edittask(id, document.getElementById('taskname').value,
+					if (confirm("Save changes?")){edittask(id, document.getElementById('taskname').value,
 							document.getElementById('tasktext').value, document
-									.getElementById('taskdate').value);
+									.getElementById('taskdate').value);}
 			};
 			document.getElementById('cancelbutton').onclick = function() {
-				editdialog(id);
+				if (confirm("Discard changes?")){editdialog(id);}
 			};
 		}
 	}
