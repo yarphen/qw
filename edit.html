@@ -3,38 +3,55 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title></title>
- <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet"
+	href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 <link rel="stylesheet" href="/resources/demos/style.css">
 <script>
-$(function() {
-$( "#taskdate" ).datepicker();
-});
+	$(function() {
+		$("#taskdate").datepicker();
+	});
 </script>
 <style>
+html, body {
+height: 100%;
+}
+
+.wrapper {
+min-height: 100%;
+height: auto !important;
+height: 100%;
+margin: 0 auto -4em;
+}
+
 .footer {
-	position: absolute;
-	bottom: 2%;
+	position: relative;
 	background-color: red;
 	height: 30px;
 	width: 90%;
 	left: 5%;
+	top: 5%;
+	bottom: 0 !important;
 }
 
 .mybutton {
 	position: relative;
-	background-color: blue;
+	background-color: silver;
 	display: inline-block;
 	width: 10%;
 	height: 20px;
-	margin-left: 30px;
-	margin-right: 30px;
+	margin: 5px;
 	vertical-align: middle;
 }
 
+.grid {
+	position: relative;
+	display: inline-block;
+}
+
 .menucontainer {
-	position: absolute;
+	position: relative;
 	background-color: grey;
 	height: 30px;
 	width: 90%;
@@ -43,184 +60,288 @@ $( "#taskdate" ).datepicker();
 }
 
 .listcontainer {
-	
+	background-color: #FFFFFF;
+	border: solid;
+	position: relative;
+	width: 60%;
+	height: auto;
+	top: 30px;
+	left: 20%;
 }
 
 .taskeditor {
 	background-color: grey;
 	position: fixed;
-	width: 60%;
-	height: 60%;
-	top: 20%;
-	left: 20%;
+	width: 70%;
+	height: 70%;
+	top: 15%;
+	left: 15%;
 	position: fixed;
 }
 
 .hidden {
 	display: none;
 }
+
+.back {
+	width: 100%;
+	height: 100%;
+	position: fixed;
+}
 </style>
 <script>
- function tasktohtml(task){
-	
- }
- function moveto(address){
-	 history.pushState(new Object(), null, location.protocol+'/'+location.hostname+location.pathname+'?'+address);
-	 route(address);
- }
- function route(id){
- 	if (localStorage[id]){
- 		editdialog(id);
- 	}else if (id=='done'){
- 		taskload('true');
- 	}else if (id=='undone'){
- 		taskload('false');
- 	}else if (id=='all'){
- 		taskload('all');
- 	}else if (id=='new'){
- 		editdialog(null);
- 	}
- }
- function editdialog(id){
- 	if (id==null||localStorage[id]==undefined){
- 		document.getElementById('taskname').value="";
- 		document.getElementById('taskdate').value="";
- 		document.getElementById('tasktext').value="";
- 		document.getElementById('savebutton').onclick=function(){if (testvalideform(document.getElementById('taskname').value,  document.getElementById('taskdate').value))createtask(document.getElementById('taskname').value, document.getElementById('tasktext').value, document.getElementById('taskdate').value);};
- 		document.getElementById('cancelbutton').onclick=function(){editdialog(null);};
- 	}else{
- 		var task = stringtotask(localStorage[id]);
- 		document.getElementById('taskname').value=task.name;
- 		document.getElementById('taskdate').value=task.date;
- 		document.getElementById('tasktext').value=task.text;
- 		document.getElementById('savebutton').onclick=function(){if (testvalideform(document.getElementById('taskname').value,  document.getElementById('taskdate').value))edittask(id, document.getElementById('taskname').value, document.getElementById('tasktext').value, document.getElementById('taskdate').value);};
- 		document.getElementById('cancelbutton').onclick=function(){editdialog(id);};
- 	}
- }
- function testvalideform(name, date){
-	 var test = true;
-	if (trim(name).length<3){
-		 alert("Too short name!");
-		 test=false;
+	onload = function() {
+		if (location.search.length > 0) {
+			moveto(location.search.replace('?', ''));
+		}
 	}
- 	if (!testdate(date)){
- 		alert("Choose valide date!");
- 		test=false;
+	var Hflag;
+	function tasktohtml(task, id) {
+		var markstate;
+		if (task.done) {
+			markstate = 'Unmark';
+		} else {
+			markstate = 'Mark';
+		}
+		return "<tr><td onclick=\"moveto('" + id + "')\">" + task.name
+				+ "      -      " + inttodate(task.dateaslong)
+				+ "</td><td onclick=\"if (confirm('Are you want to delete "
+				+ task.name + "?')) deletetask('" + id
+				+ "')\">DEL</td><td onclick=\"changemarktask('" + id + "')\">"
+				+ markstate + "</td></tr>";
+
 	}
- 	return test;
- }
- function taskload(flag) {
- 	var temp = '';
- 	var iftrue = false;
-	var iffalse = false;
- 	if (flag == 'true') {
- 		iftrue = true;
- 	}
- 	if (flag == 'false') {
- 		iffalse = true;
- 	}
- 	if (flag == 'all') {
- 		iftrue = true;
- 		iffalse = true;
- 	}
- 	for ( var id in localStorage) {
- 		var task = stringtotask(localStorage[id]);
- 		if ((task.done&&iFtrue)||(!task.done&&iffalse))
- 			temp = temp + tasktohtml(task);
- 	}
- 	document.getElementById('mytable').getElementByTagName('tbody')[0].innerHTML=temp;
- }
- function createtask(name, text, date) {
- 	var id;
- 	do{
- 		id = Math.floor(1000000000*Math.random())+'';
- 	}while(localStorage[id]);
- 	var temp = {};
- 	temp.name = name;
- 	temp.text = text;
- 	temp.dateaslong = date;
- 	temp.done = false;
- 	localStorage[id]=temp;
- 	return id;
- }
- function deletetask(id) {
- 	delete(localStorage[id]);
- }
- function edittask(id, name, text, date) {
- 	var temp = stringtotask(localStorage[id]);
- 	temp.name = name;
- 	temp.text = text;
- 	temp.dateaslong = date;
- 	localStorage[id] = tasktostring(temp);
- }
- function changemarktask(id) {
- 	var temp = stringtotask(localStorage[id]);
- 	temp.done = !temp.done;
- 	localStorage[id] = tasktostring(temp);
- }
- function tasktostring(task) {
- 	return myreplaceformat(task.name)+'\n'+myreplaceformat(task.text)+'\n'+myreplaceformat(task.dateaslong)+'\n'+myreplaceformat(task.done);
- }
- function stringtotask(string) {
- 	var task = {};
- 	var array = string.split('\n');
- 	task.name = array[0];
- 	task.text = array[1];
- 	task.dateaslong = Number(array[2]);
- 	task.done = Boolean(array[3]);
- 	return task;
- }
- function myreplaceformat(string) {
- 	return string.replace('\n', ' ');
- }
+	function inttodate(dateint) {
+		var i = Number(dateint);
+		var year = Math.floor(i / 10000);
+		i = i % 10000;
+		var day = Math.floor(i / 100);
+		i = i % 100;
+		var month = i;
+		return month + '/' + day + '/' + year;
+	}
+	function moveto(address) {
+		
+		history.pushState(new Object(), null, location.protocol + '//'
+				+ location.host + location.pathname + '?' + address);
+		route(address);
+	}
+	function route(id) {
+		Hflag = id;
+		if (localStorage.getItem(id)) {
+			editdialog(id);
+		} else if (id == 'done') {
+			document.getElementById('taskeditor').className = 'taskeditor hidden';
+			taskload('true');
+		} else if (id == 'undone') {
+			document.getElementById('taskeditor').className = 'taskeditor hidden';
+			taskload('false');
+		} else if (id == 'all') {
+			document.getElementById('taskeditor').className = 'taskeditor hidden';
+			taskload('all');
+		} else if (id == 'new') {
+			editdialog(null);
+		}
+	}
+	function editdialog(id) {
+		document.getElementById('taskeditor').className = 'taskeditor';
+		if (id == null || localStorage.getItem(id) == undefined) {
+			document.getElementById('titleeditor').innerHTML = "<H1><CENTER>CREATE THE TASK</CENTER></H1>";
+			document.getElementById('taskname').value = "";
+			document.getElementById('taskdate').value = "";
+			document.getElementById('tasktext').value = "";
+			document.getElementById('savebutton').onclick = function() {
+				if (testvalideform(document.getElementById('taskname').value,
+						document.getElementById('taskdate').value))
+					createtask(document.getElementById('taskname').value,
+							document.getElementById('tasktext').value, document
+									.getElementById('taskdate').value);
+			};
+			document.getElementById('cancelbutton').onclick = function() {
+				editdialog(null);
+			};
+		} else {
+			var task = stringtotask(localStorage.getItem(id));
+			document.getElementById('titleeditor').innerHTML = "<H1><CENTER>EDIT THE TASK</CENTER></H1>";
+			document.getElementById('taskname').value = task.name;
+			document.getElementById('taskdate').value = inttodate(task.dateaslong);
+			document.getElementById('tasktext').value = task.text;
+			document.getElementById('savebutton').onclick = function() {
+				if (testvalideform(document.getElementById('taskname').value,
+						document.getElementById('taskdate').value))
+					edittask(id, document.getElementById('taskname').value,
+							document.getElementById('tasktext').value, document
+									.getElementById('taskdate').value);
+			};
+			document.getElementById('cancelbutton').onclick = function() {
+				editdialog(id);
+			};
+		}
+	}
+	function testvalideform(name, date) {
+		var test = true;
+		if (name.trim().length < 3) {
+			alert("Too short name!");
+			test = false;
+		}
+		if (!isValidDate(date)) {
+			alert("Choose valide date!");
+			test = false;
+		}
+		return test;
+	}
+	function taskload(flag) {
+		var temp = '';
+		var iftrue = false;
+		var iffalse = false;
+		if (flag == 'true') {
+			iftrue = true;
+		}
+		if (flag == 'false') {
+			iffalse = true;
+		}
+		if (flag == 'all') {
+			iftrue = true;
+			iffalse = true;
+		}
+		for ( var id in localStorage) {
+			var task = stringtotask(localStorage.getItem(id));
+			if (task != undefined
+					&& ((task.done && iftrue) || (!task.done && iffalse)))
+				temp = temp + tasktohtml(task, id);
+		}
+		if (temp.trim().length == 0)
+			temp = "<tr><td>No data!</td></tr>"
+		temp = "<table width='100%' border='2' style='background-color: silver;'><tbody>"
+				+ temp + "</tbody></table>";
+		document.getElementById('listcontainer').innerHTML = temp;
+	}
+	function isValidDate(s) {
+		var array = s.split('/');
+		var y = array[2];
+		var m = array[0];
+		var d = array[1];
+		var daysInMonth = [ 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ];
+		if ((!(y % 4) && y % 100) || !(y % 400)) {
+			daysInMonth[1] = 29;
+		}
+		return d <= daysInMonth[--m]
+	}
+	function createtask(name, text, date) {
+		var id;
+		do {
+			id = Math.floor(1000000000 * Math.random()) + '';
+		} while (localStorage.getItem(id));
+		var temp = {};
+		temp.name = name;
+		temp.text = text;
+		var array = date.split("/");
+		var day = array[0];
+		var month = array[1];
+		var year = array[2];
+		temp.dateaslong = Number(year) * 10000 + Number(month) * 100
+				+ Number(day);
+		temp.done = false;
+		localStorage.setItem(id, tasktostring(temp));
+		taskload(Hflag);
+		return id;
+	}
+	function deletetask(id) {
+		localStorage.removeItem(id);
+		taskload(Hflag);
+	}
+	function edittask(id, name, text, date) {
+		var temp = stringtotask(localStorage.getItem(id));
+		temp.name = name;
+		temp.text = text;
+		var array = date.split("/");
+		var day = array[1];
+		var month = array[0];
+		var year = array[2];
+		temp.dateaslong = Number(year) * 10000 + Number(month) * 100
+				+ Number(day);
+		localStorage.setItem(id, tasktostring(temp));
+		taskload(Hflag);
+	}
+	function changemarktask(id) {
+		var temp = stringtotask(localStorage.getItem(id));
+		temp.done = !temp.done;
+		localStorage.setItem(id, tasktostring(temp));
+		taskload(Hflag);
+	}
+	function tasktostring(task) {
+		return myreplaceformat(task.name) + '\n' + myreplaceformat(task.text)
+				+ ' \n' + myreplaceformat(task.dateaslong) + '\n'
+				+ myreplaceformat(task.done);
+	}
+	function stringtotask(mystring) {
+		if (mystring == null)
+			return;
+		var task = {};
+		var array = mystring.split("\n");
+		task.name = array[0];
+		task.text = array[1];
+		task.dateaslong = Number(array[2]);
+		task.done = (array[3] == 'true');
+		return task;
+	}
+	function myreplaceformat(mystring) {
+		return String(mystring).replace('\n', ' ');
+	}
 </script>
 </head>
-<body bgcolor="#a7c1de" align='center'>
-	<button
-		onclick="history.pushState(new Object(), 'page 2', location.protocol+'//'+location.pathname+'?q='+Math.random());">FUCK</button>
+<body bgcolor="#a7c1de">
+	<div class="back"
+		onmousedown="document.getElementById('taskeditor').className = 'taskeditor hidden';"></div>
 
-	<div class='menucontainer'>
-		<div class='mybutton' onclick="moveto('done')">done</div>
-		<div class='mybutton' onclick="moveto('undone')">undone</div>
-		<div class='mybutton' onclick="moveto('all')">all</div>
-		<div class='mybutton' onclick="editdialog(null)">create</div>
-	</div>
 
-	<div class="listcontainer">
-		<table id='mytable'>
-			<tbody>
-				<tr>
-					
-				</tr>
-			</tbody>
-		</table>
+	<div class="wrapper">
+		<div class='menucontainer'>
+			<center>
+				<div class='mybutton' onclick="moveto('done')">done</div>
+				<div class='mybutton' onclick="moveto('undone')">undone</div>
+				<div class='mybutton' onclick="moveto('all')">all</div>
+				<div class='mybutton' onclick="editdialog(null)">create</div>
+			</center>
+		</div>
+		<div id="listcontainer" class="listcontainer">
+			<table>
+				<tbody id='mytable'>
+				</tbody>
+			</table>
+		</div>
+
 	</div>
-	<div class="taskeditor">
+	<div class='footer'>
+		<center>©МИХАЙЛО, Київ-2015</center>
+	</div>
+	<div id="taskeditor" class="taskeditor hidden">
 		<table width="100%" height="100%">
 			<tbody>
 				<tr>
-					<td colspan="2"><div id=""></div></td>
+					<td><div id="titleeditor"></div></td>
 				</tr>
 				<tr>
-					<td><input id="taskname" type="text" style="float: left;"></td>
-					<td><input id="taskdate" type="text" style="float: right;"></td>
+					<td><input class="grid" id="taskname" type="text"
+						style="float: left;"> <input class="grid" id="taskdate"
+						type="text" style="float: right;"></td>
 				</tr>
 				<tr>
-					<td colspan="2"><textarea rows="10" id="tasktext" style="width: 99.5%; height: 100%; resize: none;">
+					<td><textarea rows="10" id="tasktext"
+							style="width: 99.5%; height: 100%; resize: none;">
 					</textarea></td>
 				</tr>
 				<tr>
 					<td>
-						<button id="savebutton"  style="float: left;">SAVE</button>
-					</td>
-					<td>
-						<button id="cancelbutton"  style="float: right;">CANCEL</button>
+						<button class="grid" id="savebutton">SAVE</button>
+						<button class="grid" id="closebutton"
+							onmousedown="document.getElementById('taskeditor').className = 'taskeditor hidden';">CLOSE</button>
+						<button class="grid" id="cancelbutton">CANCEL</button>
 					</td>
 				</tr>
 			</tbody>
 		</table>
 	</div>
-	<div class='footer'></div>
 </body>
 </html>
 <!-- remixttpid=737d9077f1ecb027449feab53332e2bd1eba8a874b
