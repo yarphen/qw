@@ -100,12 +100,15 @@ margin: 0 auto -4em;
 	var Hflag;
 	function tasktohtml(task, id) {
 		var markstate;
+		var mycolor;
 		if (task.done) {
 			markstate = 'Unmark';
+			mycolor='#CDE3C0';
 		} else {
 			markstate = 'Mark';
+			mycolor='#D07D71';
 		}
-		return "<tr><td onclick=\"moveto('" + id + "')\">" + task.name
+		return "<tr><td  style='background-color: "+mycolor+"' onclick=\"moveto('" + id + "')\">" + task.name
 				+ "      -      " + inttodate(task.dateaslong)
 				+ "</td><td onclick=\"if (confirm('Are you want to delete "
 				+ task.name + "?')) deletetask('" + id
